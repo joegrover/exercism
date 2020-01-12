@@ -1,0 +1,30 @@
+{
+  "samples": {
+    "us1850c": 4,
+    "us1860c": 4,
+    "us1870c": 4,
+    "us1880e": 4,
+    "us1910m": 4
+  },
+  "variables": {
+    "AGE": 4,
+    "BIRTHMO": 4,
+    "IMPREL": 4,
+    "SEX": 4
+  },
+  "sample_variables": {
+    "us1850c, AGE": 4,
+    "us1850c, IMPREL": 4,
+    "us1850c, SEX": 4,
+    "us1860c, AGE": 4,
+    "us1860c, IMPREL": 4
+  },
+  "data_tables": {
+    "1790_cPop.dt1": 2,
+    "1800_cPop.dt1": 2
+  },
+  "users": {
+    "123": 4,
+    "23r": 2
+  }
+}
