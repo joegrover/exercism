@@ -44,7 +44,9 @@ def add_sample(sample_name, product_name):
     s.name = sample_name.lower()
     s.product = p.to_dbref()
 
+
 def load_usa_sample_variables():
+    pass
 
 
 class ExtractRequestMessage:
