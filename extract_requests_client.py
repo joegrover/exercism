@@ -2,6 +2,7 @@ import pika
 import argparse
 import sys
 import time
+import database
 
 # This client is only meant to connect to the "extract_requests"
 # exchange, so this stuff is all global, but it wouldn't be too
@@ -81,6 +82,7 @@ def print_extract_request(ch, method, properties, body):
     # There apears to be some kind of a mandatory wait time between
     # extract request submissions so that they don't all end up printing to my screen
     # right now... Let's do some real acknowledging to see if that helps.
+    # database.save(body)
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
