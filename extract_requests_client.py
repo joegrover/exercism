@@ -86,13 +86,20 @@ def print_extract_request(ch, method, properties, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
+def send_to_db(ch, method, properties, body):
+    print(body)
+    extract_request = database.ExtractRequestMessage(body)
+    extract_request.save()
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+
 def main(args):
     global channel
     bindings = products_to_bindings(args.product)
     for b in bindings:
         channel.queue_bind(exchange=exchange_name, queue=q_name, routing_key=b)
     print("Open for business. Send me some Extract Requests to store!")
-    channel.basic_consume(queue=q_name, on_message_callback=print_extract_request)
+    channel.basic_consume(queue=q_name, on_message_callback=send_to_db)
     channel.start_consuming()
 
 

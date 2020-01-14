@@ -1,6 +1,7 @@
 import mongoengine
 import data_model
 import json
+import pandas
 
 # Connect to DB, defaults work here.
 mongoengine.register_connection(alias="core", name="extract_requests")
@@ -22,11 +23,63 @@ def valid_product(product_name):
     Returns:
         data_model.Product: Product Document object
     """
-    p = data_model.Product.objects(name=product_name.lower()).first()
-    if p is None:
+    try:
+        p = data_model.Product.objects().get(name=product_name.lower())
+    except mongoengine.DoesNotExist:
         # XXX We won't worry about bogus product names getting in right now.
         p = add_product(product_name)
     return p
+
+
+def add_sample(sample_name, product_name):
+    p = valid_product(product_name)
+    s = data_model.Sample()
+    s.name = sample_name.lower()
+    s.product = p.to_dbref()
+    s.save()
+    return s
+
+
+def valid_sample(sample_name, product_name):
+    try:
+        s = data_model.Sample.objects().get(name=sample_name.lower())
+    except mongoengine.DoesNotExist:
+        s = add_sample(sample_name, product_name)
+    return s
+
+
+def add_variable(variable_name, product_name):
+    p = valid_product(product_name)
+    v = data_model.Variable()
+    v.name = variable_name.lower()
+    v.product = p.to_dbref()
+    v.save()
+    return v
+
+
+def valid_variable(variable_name, product_name):
+    try:
+        v = data_model.Variable.objects().get(name=variable_name.lower())
+    except mongoengine.DoesNotExist:
+        v = add_variable(variable_name, product_name)
+    return v
+
+
+def add_datatable(datatable_name, product_name):
+    p = valid_product(product_name)
+    dt = data_model.DataTable()
+    dt.name = datatable_name.lower()
+    dt.product = p.to_dbref()
+    dt.save()
+    return dt
+
+
+def valid_datatable(datatable_name, product_name):
+    try:
+        dt = data_model.DataTable.objects().get(name=datatable_name.lower())
+    except mongoengine.DoesNotExist:
+        dt = add_datatable(datatable_name, product_name)
+    return dt
 
 
 def add_user(user_name, product_name):
@@ -38,15 +91,36 @@ def add_user(user_name, product_name):
     return u
 
 
-def add_sample(sample_name, product_name):
-    p = valid_product(product_name)
-    s = data_model.Sample()
-    s.name = sample_name.lower()
-    s.product = p.to_dbref()
+def valid_user(user_name, product_name):
+    try:
+        u = data_model.User.objects().get(name=user_name.lower())
+    except mongoengine.DoesNotExist:
+        u = add_user(user_name, product_name)
+    # TODO check if user exists for given product. if not add.
+    return u
+
+
+def add_variable_sample_references(sample_name, variable_name, product_name):
+    s = valid_sample(sample_name, product_name)
+    v = valid_variable(variable_name, product_name)
+    # XXX Right now Sample.variables is a list of strings so the validated
+    # variable name is all that we can store.
+    s.variables.append(v.name)
+    s.save()
+    v.samples.append(s.to_dbref())
+    v.save()
 
 
 def load_usa_sample_variables():
-    pass
+    # TODO Right now, if you run this after the database has already been created
+    # the lists within the documents end up full of duplicates...
+    sv = pandas.read_csv("sample_variables.csv")
+    sv.apply(
+        lambda x: add_variable_sample_references(
+            x.sample_name, x.variable_mnemonic, "usa"
+        ),
+        axis=1,
+    )
 
 
 class ExtractRequestMessage:
@@ -74,6 +148,10 @@ class ExtractRequestMessage:
         self.variables = message_dict["variables"]
 
     def save(self):
+        # XXX These two save methods have a lot in commong.
+        # Adding all of the add_* and valid_* methods to this
+        # class will remove a lot of redundant querying and remove
+        # some repetition in this code.
         if self.product == "nhgis":
             self.save_nhgis()
         elif self.product == "usa":
@@ -82,17 +160,49 @@ class ExtractRequestMessage:
             raise NotImplementedError(f"{self.product} is not a support product.")
 
     def save_nhgis(self):
-        # Is nhgis in our Product collection?
-        add_product(self.product.lower())
-        # if not, add it
+        # Is nhgis in our Product collection? if not, add it
+        p = valid_product(self.product)
 
-        # is the user in our User collection?
-        add_user(self.user, self.product)
-        # if not add them
+        # is the user in our User collection? if not, add them
+        u = valid_user(self.user, self.product)
 
-        # is the DataTable in our collect?
+        # are the DataTables in our collection? if not, add it
+        dts = []
+        for dt in self.data_tables:
+            dt = valid_datatable(dt, self.product)
+            dts.append(dt.to_dbref())
 
-        # if not, add it
+        er = data_model.ExtractRequest()
+        er.user_id = u.id
+        er.product = p.to_dbref()
+        er.datatables = dts
+        er.save()
+        u.extracts.append(er.to_dbref())
+        u.save()
 
-        # finally declare and save ExtractRequest
-        pass
+    def save_usa(self):
+        # Is usa in our Product collection? if not, add it
+        p = valid_product(self.product)
+
+        # is the user in our User collection? if not, add them
+        u = valid_user(self.user, self.product)
+
+        # are the Samples and Variables in our collections? if not, add it
+        samples = []
+        variables = []
+        for s in self.samples:
+            s = valid_sample(s, self.product)
+            samples.append(s.to_dbref())
+
+        for v in self.variables:
+            v = valid_variable(v, self.product)
+            variables.append(v.to_dbref())
+
+        er = data_model.ExtractRequest()
+        er.user_id = u.id
+        er.product = p.to_dbref()
+        er.samples = samples
+        er.variables = variables
+        er.save()
+        u.extracts.append(er.to_dbref())
+        u.save()
