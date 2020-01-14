@@ -2,7 +2,7 @@
 
 ## Requires:
 * Docker
-* virtualenv, or some other python environment managere (or just install stuff globally, see if I care)
+* virtualenv, or some other python environment manager (or just install stuff globally, see if I care)
 
 ## How to run:
 1. _[Optional]_ Create a virtual environment here with `virtualenv venv`
