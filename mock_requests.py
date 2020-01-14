@@ -35,7 +35,7 @@ def mock_usa_request(repeats=2):
     return resp
 
 
-def mock_nhgis_request(repeats=2):
+def mock_nhgis_request(repeats=1):
     k_d = random.randint(1, len(data_tables))
     d = random.sample(data_tables, k=k_d)
     u = random.choice(users)

@@ -21,7 +21,7 @@ def run_client():
 
 
 def run():
-    mclient = MongoClient(host="mongodb://localhost", port=27017)
+    mclient = MongoClient(host="0.0.0.0", port=27017)
     mclient.drop_database("extract_requests")
     # load database with sample-by-variable connections from csv
     database.load_usa_sample_variables()

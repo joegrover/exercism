@@ -1,0 +1,16 @@
+version: '2.1'
+
+services:
+  exercism:
+    image: exercism
+    build: .
+    ports:
+      - 5000:5000
+    links:
+      - db
+    depends_on:
+      - db
+  db:
+    image: mongo
+    ports:
+      - 27017:27017

@@ -30,7 +30,7 @@ def run_extract_report():
 if __name__ == "__main__":
     client = start_fresh()
     try:
-        app.run(host="localhost", port=4996)
+        app.run(host="0.0.0.0", port=5000)
     except Exception:
         client.kill()
     finally:

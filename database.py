@@ -4,7 +4,9 @@ import json
 import pandas
 
 # Connect to DB, defaults work here.
-mongoengine.register_connection(alias="core", name="extract_requests")
+mongoengine.register_connection(
+    alias="core", name="extract_requests", host="0.0.0.0", port=27017,
+)
 
 
 def add_product(product_name):
