@@ -18,6 +18,7 @@
   * [X] Try out MongoDB? Seems like one extract == one document makes sense...
   * ~~[ ] Could just do SQLite since, well I've actually used it before.~~
   * [X] Come up with model.
+* [X] Generate report.
 * [ ] Reports API server
   * [ ] Flask
   * [ ] Mimic example report

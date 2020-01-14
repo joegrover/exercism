@@ -123,6 +123,37 @@ def load_usa_sample_variables():
     )
 
 
+def n_extracts_by_sample_variables():
+    # Get collection of extract ids, and for each sample in the variable
+    # see how many share extract ids
+    report = {}
+    for v in data_model.Variable.objects():
+        extracts = set(v.extracts)
+        for s in v.samples:
+            report[f"{s.name}, {v.name}"] = len(extracts ^ set(s.extracts))
+    return report
+
+
+def n_extracts_by_collection(Collection):
+    # Probably should first verify that the document has extracts...
+    result = {d.name: len(d.extracts) for d in Collection.objects()}
+    return result
+
+
+def extract_report():
+    report = {}
+    collections = [
+        data_model.DataTable,
+        data_model.Sample,
+        data_model.Variable,
+        data_model.User,
+    ]
+    for c in collections:
+        report[c._meta["collection"]] = n_extracts_by_collection(c)
+    report["sample_variables"] = n_extracts_by_sample_variables()
+    return json.dumps(report)
+
+
 class ExtractRequestMessage:
     # XXX: Could probably make this a base class and then create
     # NhgisExtractRequestMessage and UsaExtractRequestMessage child classes...
@@ -170,15 +201,18 @@ class ExtractRequestMessage:
         dts = []
         for dt in self.data_tables:
             dt = valid_datatable(dt, self.product)
-            dts.append(dt.to_dbref())
+            dts.append(dt)
 
         er = data_model.ExtractRequest()
         er.user_id = u.id
         er.product = p.to_dbref()
-        er.datatables = dts
+        er.datatables = [dt.to_dbref() for dt in dts]
         er.save()
         u.extracts.append(er.to_dbref())
         u.save()
+        for dt in dts:
+            dt.extracts.append(er.id)
+            dt.save()
 
     def save_usa(self):
         # Is usa in our Product collection? if not, add it
@@ -187,22 +221,32 @@ class ExtractRequestMessage:
         # is the user in our User collection? if not, add them
         u = valid_user(self.user, self.product)
 
+        er = data_model.ExtractRequest()
+        er.user_id = u.id
+        er.product = p.to_dbref()
         # are the Samples and Variables in our collections? if not, add it
         samples = []
         variables = []
         for s in self.samples:
             s = valid_sample(s, self.product)
-            samples.append(s.to_dbref())
-
+            samples.append(s)
         for v in self.variables:
             v = valid_variable(v, self.product)
-            variables.append(v.to_dbref())
-
-        er = data_model.ExtractRequest()
-        er.user_id = u.id
-        er.product = p.to_dbref()
-        er.samples = samples
-        er.variables = variables
+            variables.append(v)
+        er.samples = [s.to_dbref() for s in samples]
+        er.variables = [v.to_dbref() for v in variables]
         er.save()
         u.extracts.append(er.to_dbref())
         u.save()
+        # Drop the ExtractRequest id onto the Sample and Variable
+        # Documents for easy querying. I'm still not sure if
+        # I like this model, but it definitely achieves the
+        # defined report easily.
+        # Have to do this after ExtractRequest Document has been saved
+        # so that it actually has an ID.
+        for s in samples:
+            s.extracts.append(er.id)
+            s.save()
+        for v in variables:
+            v.extracts.append(er.id)
+            v.save()

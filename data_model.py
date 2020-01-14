@@ -16,6 +16,7 @@ class Sample(mongoengine.Document):
         Product, reverse_delete_rule=mongoengine.CASCADE
     )
     name = mongoengine.StringField(required=True, primary_key=True)
+    extracts = mongoengine.ListField(mongoengine.ObjectIdField())
     # TODO: Kinda stuck here... I would like Sample objects to have a list
     # of references to variables and vice versa, but I need to have
     # the Variable class defined in order to reference it...
@@ -36,6 +37,7 @@ class Variable(mongoengine.Document):
     # Right now "name" could be a primary key, but if we have multiple products in this
     # database then Variable names might collide.
     name = mongoengine.StringField(required=True, primary_key=True)
+    extracts = mongoengine.ListField(mongoengine.ObjectIdField())
     # Variables can belong to many samples, if a sample is deleted remove that sample
     # from the variable's list of samples.
     samples = mongoengine.ListField(
@@ -60,6 +62,7 @@ class DataTable(mongoengine.Document):
         Product, reverse_delete_rule=mongoengine.CASCADE
     )
     name = mongoengine.StringField(required=True, primary_key=True)
+    extracts = mongoengine.ListField(mongoengine.ObjectIdField())
     meta = {
         "db_alias": "core",
     }
