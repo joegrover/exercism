@@ -19,7 +19,11 @@
   * ~~[ ] Could just do SQLite since, well I've actually used it before.~~
   * [X] Come up with model.
 * [X] Generate report.
-* [ ] Reports API server
-  * [ ] Flask
-  * [ ] Mimic example report
+* [X] Reports API server
+  * [X] Flask
+  * [X] Mimic example report
 * [ ] Docker-eyes
+  * [X] pip requirements
+  * [ ] also start up mongodb docker container
+  * [ ] run the report.py
+  * [ ] expose to the world somehow...
