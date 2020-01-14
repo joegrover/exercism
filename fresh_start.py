@@ -34,6 +34,7 @@ def run():
     # run a report:
     print(json.dumps(database.extract_report()))
     # keep client running:
+    print("client is still running, waiting for more extracts...")
     client.communicate()
 
 
