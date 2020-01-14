@@ -49,7 +49,8 @@ overall I really liked learning about these new-to-me tools. This exercise inclu
       avail.
 There is a lot of room for improvement here. There is a lot of redundant querying and
 general database interaction. Loading the sample_variables.csv into the database
-multiple times results in... well a mess. But I'm happy with where I've ended and
+multiple times results in... well a mess. I could also add some better package
+management and make this a true Flask app. But I'm happy with where I've ended and
 I look forward to talking about my work further.
 
 
