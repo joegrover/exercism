@@ -47,6 +47,9 @@ overall I really liked learning about these new-to-me tools. This exercise inclu
       couldn't get the `exercism` container to connect with the mongodb container. I
       feel like it most be something dead simple, and I tried a number of "fixes" to no
       avail.
+There is a lot of room for improvement here. There is a lot of redundant querying and
+general database interaction. Loading the sample_variables.csv into the database
+multiple times results in... well a mess. But I'm happy with where I've ended and
 I look forward to talking about my work further.
 
 
