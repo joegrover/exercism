@@ -9,16 +9,16 @@
 2. _[Optional]_ Activate your virtual environment with `source venv/bin/activate`
 3. Install python requirements with `pip install -r requirements`
 4. Start up the mongodb docker container with `docker run -d -p 27017:27017 --name db mongo`
-5. Start program with `python report.py`
+5. Start the program with `python report.py`
     * This program starts by removing any existing 'extract_requests' database.
     * It then starts the RabbitMQ client to listen for messages
     * I then send a random number of randomly configured extract requests to the
       nhgis and usa endpoints to put some data in the database.
-    * A first report is run and printed to the screen, but hte client remains running,
+    * A first report is run and printed to the screen, but the client remains running,
       ready to recieve any more extract requests for storing.
-    * You can get the json extract report payload from to http://0.0.0.0:5000/report.json
-6. Stop program with a Ctrl-C
-7. Stop the MongoDB with `docker stop db` (you can restart it with `docker start db`)
+    * You can get the json extract report payload from http://0.0.0.0:5000/report.json
+6. Stop the program with a Ctrl-C
+7. Stop MongoDB with `docker stop db` (you can restart it with `docker start db`)
 
 ## Closing thoughts:
 
@@ -47,6 +47,7 @@ overall I really liked learning about these new-to-me tools. This exercise inclu
       couldn't get the `exercism` container to connect with the mongodb container. I
       feel like it most be something dead simple, and I tried a number of "fixes" to no
       avail.
+      
 There is a lot of room for improvement here. There is a lot of redundant querying and
 general database interaction. Loading the sample_variables.csv into the database
 multiple times results in... well a mess. I could also add some better package
